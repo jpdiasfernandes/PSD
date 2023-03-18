@@ -5,13 +5,15 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 class ServeRunnable implements Runnable{
-    private Set<SocketChannel> receivers;
+    private List<SocketChannel> receivers;
     private SocketChannel s;
-    public ServeRunnable(Set<SocketChannel> receivers, SocketChannel s) {
+    public ServeRunnable(List<SocketChannel> receivers, SocketChannel s) {
         this.receivers = receivers;
         this.s = s;
     }
@@ -22,16 +24,20 @@ class ServeRunnable implements Runnable{
         try {
             int size = -1;
             while((size = s.read(buf)) > 0) {
+                //System.out.println(size);
                 buf.flip();
-                System.out.println(utf8.decode(buf));
+                String out = String.valueOf(utf8.decode(buf));
+                System.out.println(out);
                 buf.flip();
 
                 for(SocketChannel r: receivers) {
                     r.write(buf.duplicate());
+                    System.out.println("Enviei " + out + " para " + r.toString());
                 }
                 buf.clear();
             }
             s.close();
+            receivers.remove(s);
         } catch (IOException e) {
             System.out.println(e.getMessage());
         }
@@ -45,7 +51,7 @@ public class Ex1 {
             ServerSocketChannel ss = ServerSocketChannel.open();
             ss.bind(new InetSocketAddress(6201));
 
-            Set<SocketChannel> receivers = new HashSet<>();
+            List<SocketChannel> receivers = new ArrayList<>();
             while(true) {
                 SocketChannel s = ss.accept();
                 System.out.println("Aceitei um pedido");
