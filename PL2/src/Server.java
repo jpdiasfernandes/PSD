@@ -24,7 +24,7 @@ public class Server {
             // prontas quando o select() for invocado
             ss.register(sel, SelectionKey.OP_ACCEPT);
 
-            List<SelectionKey> receivers =  new ArrayList<>();
+            Set<SelectionKey> receivers =  new HashSet<>();
             List<ByteBuffer> history = new ArrayList<>();
 
             while(true) {
@@ -54,6 +54,8 @@ public class Server {
                         } else {
                             key.cancel();
                             s.close();
+                            receivers.remove(key);
+                            continue;
                         }
                     }
                     if (key.isWritable()) {
@@ -68,8 +70,13 @@ public class Server {
                             key.interestOps(SelectionKey.OP_READ);
                         }
 
-                        s.write(buf);
+                        int r = s.write(buf);
                         buf.flip();
+                        if (r <= 0) {
+                            key.cancel();
+                            receivers.remove(key);
+                            s.close();
+                        }
                     }
                 }
                 sel.selectedKeys().clear();
