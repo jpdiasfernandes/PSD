@@ -19,7 +19,7 @@ class ServeRunnable implements Runnable{
     }
 
     public void run() {
-        ByteBuffer buf = ByteBuffer.allocate(100);
+        ByteBuffer buf = ByteBuffer.allocate(1000);
         Charset utf8 = StandardCharsets.UTF_8;
         try {
             int size = -1;
@@ -54,6 +54,7 @@ public class Ex1 {
             List<SocketChannel> receivers = new ArrayList<>();
             while(true) {
                 SocketChannel s = ss.accept();
+                s.configureBlocking(true);
                 System.out.println("Aceitei um pedido");
                 receivers.add(s);
                 Thread serve = new Thread(new ServeRunnable(receivers, s));

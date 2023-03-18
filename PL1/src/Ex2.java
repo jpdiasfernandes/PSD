@@ -27,7 +27,7 @@ class SleepyClientSender implements Runnable {
     }
     public void run() {
         try {
-            ByteBuffer buffer = ByteBuffer.allocate(100);
+            ByteBuffer buffer = ByteBuffer.allocate(1000);
             ReadableByteChannel in = Channels.newChannel(System.in);
             while(in.read(buffer) > 0) {
                 buffer.flip();
@@ -87,6 +87,7 @@ public class Ex2 {
         try {
             SocketChannel client = SocketChannel.open();
             client.connect(new InetSocketAddress("localhost", 6201));
+            client.configureBlocking(true);
             Thread sender = new Thread(new SleepyClientSender(min_amount, max_amount, client));
             Thread receiver = new Thread(new SleepyClientReceiver(min_amount, max_amount, client));
 
